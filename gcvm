@@ -1,0 +1,52 @@
+#!/bin/bash
+
+usage() {
+	echo "usage: gcvm (list|start|stop) ARGS OPTIONS"
+	exit 1
+}
+
+if [ $# -eq 0 ]; then
+	usage
+fi
+arg1=$1
+shift
+case $arg1 in
+	list)
+		base="gcloud compute instances list | grep -e \"RUNNING\" -e \"STATUS\""
+		quiet=""
+		while getopts "aq" opt; do
+			case $opt in
+				a)
+					base="$(echo $base | awk -F'|' '{print $1}')";;
+				q)
+					quiet=" | tail -n +2 | awk '{print \$1}'";;
+				\?)
+					echo "Invalid option -$OPTARG"
+					usage;;
+			esac
+		done
+		cmd="$base$quiet"
+		eval $cmd;;
+	start | stop)
+		base="gcloud compute instances $arg1"
+		zone=" $1 --zone europe-west1-b"
+		while getopts "a" opt; do
+			case $opt in
+				a)
+					base="gcvm list -q | xargs -i $base"
+					zone=" {} --zone europe-west1-b";;
+				\?)
+					echo "Invalid option -$OPTARG"
+					usage;;
+			esac
+		done
+		cmd="$base$zone"
+		eval $cmd
+		if [ $# -gt 1 ]; then
+			shift
+			gcvm $arg1 $@
+		fi;;
+	*)
+		usage
+esac
+exit 0
