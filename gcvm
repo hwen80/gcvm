@@ -33,7 +33,11 @@ case $arg1 in
 		while getopts "a" opt; do
 			case $opt in
 				a)
-					base="gcvm list -q | xargs -i $base"
+					if [ $arg1 = "stop" ]; then
+						base="gcvm list -q | xargs -i $base"
+					else
+						base="gcvm list -aq | xargs -i $base"
+					fi
 					zone=" {} --zone europe-west1-b";;
 				\?)
 					echo "Invalid option -$OPTARG"
