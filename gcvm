@@ -50,7 +50,13 @@ case $arg1 in
 			shift
 			gcvm $arg1 $@
 		fi;;
+	env)
+		eval $(docker-machine env $1);;
+	ssh)
+		gcloud compute ssh $1 --zone europe-west1-b;;
+	scp)
+		gcloud compute scp --zone europe-west1-b $@;;
 	*)
-		usage
+		usage;;
 esac
 exit 0
